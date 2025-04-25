@@ -100,7 +100,7 @@ function EnergyCalculator({
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
-                    type="number"  // `number` tipi kullanıyoruz
+                    type="text"  // Burada "text" kullanıyoruz
                     value={magnitude}
                     onChange={(e) => {
                         let inputValue = e.target.value;
@@ -182,7 +182,7 @@ function CompareTool({
                 <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude1"
-                    type="number"
+                    type="text"  // Burada da "text" tipi kullanılıyor
                     value={m1}
                     onChange={(e) => handleMagnitudeChange(1, parseFloat(e.target.value))}
                     step="0.1"
@@ -196,7 +196,7 @@ function CompareTool({
                 <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude2"
-                    type="number"
+                    type="text"  // Yine "text" tipi
                     value={m2}
                     onChange={(e) => handleMagnitudeChange(2, parseFloat(e.target.value))}
                     step="0.1"
