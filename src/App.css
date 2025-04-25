@@ -1,65 +1,141 @@
-.App {
-  text-align: center;
+/* Sayfa genel ayarları */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5; /* Nötr, sade arka plan */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(45deg, #ff9a8b, #ffc3a0);
+}
+
+/* Uygulama kartı */
+.App {
+  background-color: #fff;
   color: #333;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 12px;
   width: 400px;
-  margin: 0 auto; /* Yatayda ortalamak için */
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-
-  /* Grid ile tam ortalamayı sağlıyoruz */
-  display: grid;
-  place-items: center; /* Yatay ve dikeyde ortalamak için */
-  height: 100vh; /* Sayfanın tamamını kapsayacak şekilde */
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-input[type="number"],
-input[type="range"] {
-  padding: 10px;
-  margin: 20px 0;
+/* Açıklama paragrafları */
+.description {
+  margin-top: -10px;
+  font-size: 0.95rem;
+  color: #555;
+  text-align: center;
+}
+
+.error {
+  margin-top: 20px;
+  color: darkred;
+}
+
+.comparison {
+  margin-top: 20px;
+  font-weight: 600;
+  color: #333;
+  background-color: #e0e0e0;
+  padding: 10px 15px;
   border-radius: 8px;
-  border: 2px solid #ccc;
-  font-size: 18px;
-  width: 80%;
+  text-align: center;
 }
 
+/* Giriş alanları */
+input[type="number"] {
+  padding: 12px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 2px solid #ccc;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Buton */
 button {
-  padding: 12px 25px;
+  padding: 12px 30px;
   border-radius: 25px;
   border: none;
   background-color: #007BFF;
   color: white;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 10px;
 }
 
 button:hover {
   background-color: #0056b3;
 }
 
-pre {
-  text-align: left;
-  background-color: #fff;
-  padding: 15px;
-  border-radius: 8px;
+/* Sonuç listesi */
+ul.results {
+  list-style: none;
+  padding: 0;
   margin-top: 20px;
-  font-size: 16px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
-@media (max-width: 600px) {
+ul.results li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: white;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  color: #333;
+}
+
+/* İkonlar */
+.icon {
+  font-size: 1.6rem;
+}
+
+.icon.enerji {
+  color: #fbc02d;
+}
+
+.icon.tnt {
+  color: #ff5722;
+}
+
+.icon.hirosima-bombasi {
+  color: #9c27b0;
+}
+
+.icon.benzin {
+  color: #009688;
+}
+
+.icon.kalori {
+  color: #ff9800;
+}
+
+.icon.yildirim {
+  color: #2196f3;
+}
+
+/* Responsive tasarım */
+@media (max-width: 500px) {
   .App {
     width: 90%;
     padding: 15px;
   }
 
-  input[type="number"],
-  input[type="range"],
+  input,
   button {
     width: 100%;
   }
