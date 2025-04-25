@@ -1,11 +1,10 @@
 import { useState, useMemo, JSX } from "react";
-import "./App.css";
+import "./App.css"; // CSS import yorum satırına alındı, yoksa hata verebilir
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
 import { WiDayLightning } from "react-icons/wi";
 import { RiScales3Line } from "react-icons/ri";
 
-// Tip tanımlamaları
 interface EnergyResult {
     label: string;
     value: string;
@@ -68,22 +67,26 @@ function MagnitudeInput({
     value: number;
     onChange: (value: number) => void;
 }) {
+    const [inputValue, setInputValue] = useState(value.toString());
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setInputValue(val);
+        const numericVal = parseFloat(val);
+        if (!isNaN(numericVal)) {
+            onChange(numericVal);
+        }
+    };
+
     return (
         <div style={{ width: "100%" }}>
             <label htmlFor={id}>{label}</label>
             <input
                 id={id}
-                type="number"
-                value={value}
-                onChange={(e) => {
-                    const inputValue = e.target.value.replace(",", ".");
-                    if (/^\d*\.?\d*$/.test(inputValue)) {
-                        onChange(parseFloat(inputValue));
-                    }
-                }}
-                step="0.1"
-                min="1.0"
-                max="10.0"
+                type="text"
+                inputMode="decimal"
+                value={inputValue}
+                onChange={handleChange}
                 aria-describedby={`${id}Error`}
             />
         </div>
