@@ -94,13 +94,12 @@ function EnergyCalculator({
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
-                    type="number"
+                    type="text"  // Değişiklik burada: "number" yerine "text"
                     value={magnitude}
                     onChange={(e) => {
-                        // Geçerli bir sayı veya nokta (.) kontrolü
                         const inputValue = e.target.value;
 
-                        // Eğer girilen değer geçerli bir sayı (veya decimal) değilse, değeri değiştirme
+                        // Sayıyı geçerli olup olmadığını kontrol et
                         if (/^\d*\.?\d*$/.test(inputValue)) {
                             onMagnitudeChange(parseFloat(inputValue));
                         }
