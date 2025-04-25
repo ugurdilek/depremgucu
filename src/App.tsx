@@ -1,4 +1,4 @@
-import { useState, useMemo, JSX } from "react";
+import { useState, useMemo, JSX, useEffect } from "react";
 import "./App.css";
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
@@ -35,8 +35,7 @@ function useEarthquakeCalculator() {
         if (factor === 1) return "Her iki deprem eşit büyüklüktedir.";
         if (factor > 1)
             return `${m2.toFixed(1)} büyüklüğündeki deprem, ${m1.toFixed(1)} büyüklüğündekinden yaklaşık ${factor.toFixed(1)} kat daha güçlüdür.`;
-        else
-            return `${m1.toFixed(1)} büyüklüğündeki deprem, ${m2.toFixed(1)} büyüklüğündekinden yaklaşık ${(1 / factor).toFixed(1)} kat daha güçlüdür.`;
+        return `${m1.toFixed(1)} büyüklüğündeki deprem, ${m2.toFixed(1)} büyüklüğündekinden yaklaşık ${(1 / factor).toFixed(1)} kat daha güçlüdür.`;
     };
 
     return { calculateEnergy, compareMagnitudes };
@@ -71,22 +70,28 @@ function EnergyCalculator({
     onReset: () => void;
 }) {
     const [error, setError] = useState<string>("");
+    const [inputVal, setInputVal] = useState<string>(magnitude.toString());
 
-    // Platforma göre input ayarları
-    const inputProps = useMemo(() => {
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-            return { type: "text", inputMode: "decimal" as const, placeholder: "örn. 6.5" };
+    useEffect(() => {
+        setInputVal(magnitude.toString());
+    }, [magnitude]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let val = e.target.value;
+        // sadece rakam, nokta veya virgül
+        if (/^[0-9]*[.,]?[0-9]*$/.test(val)) {
+            setInputVal(val);
+            const normalized = val.replace(",", ".");
+            // tam sayı veya ondalık nokta izleyen rakamlar
+            if (/^[0-9]+(\.[0-9]*)?$/.test(normalized)) {
+                const parsed = parseFloat(normalized);
+                onMagnitudeChange(parsed);
+                setError("");
+            }
         }
-        return { type: "number" as const, step: "0.1", min: "1", max: "10" };
-    }, []);
-
-    const handleMagnitudeChangeLocal = (value: number) => {
-        setError("");
-        onMagnitudeChange(value);
     };
 
-    const validateInput = (): boolean => {
+    const validateInput = () => {
         if (isNaN(magnitude) || magnitude < 1.0 || magnitude > 10.0) {
             setError("Lütfen 1.0 ile 10.0 arasında geçerli bir büyüklük giriniz.");
             return false;
@@ -101,20 +106,11 @@ function EnergyCalculator({
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
-                    {...inputProps}
-                    value={magnitude.toString()}
-                    onKeyDown={(e) => {
-                        if (e.key === ',') {
-                            e.preventDefault();
-                            handleMagnitudeChangeLocal(parseFloat(e.currentTarget.value + '.'));
-                        }
-                    }}
-                    onChange={(e) => {
-                        const raw = e.target.value.replace(',', '.');
-                        if (/^\d*\.?\d*$/.test(raw)) {
-                            handleMagnitudeChangeLocal(parseFloat(raw));
-                        }
-                    }}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="örn. 6.5"
+                    value={inputVal}
+                    onChange={handleChange}
                     aria-describedby="magnitudeError"
                 />
             </div>
@@ -146,24 +142,31 @@ function CompareTool({
     onReset: () => void;
 }) {
     const [error, setError] = useState<string>("");
+    const [val1, setVal1] = useState<string>(m1.toString());
+    const [val2, setVal2] = useState<string>(m2.toString());
 
-    const inputProps = useMemo(() => {
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-            return { type: "text", inputMode: "decimal" as const, placeholder: "örn. 6.5" };
-        }
-        return { type: "number" as const, step: "0.1", min: "1", max: "10" };
-    }, []);
+    useEffect(() => {
+        setVal1(m1.toString());
+    }, [m1]);
+    useEffect(() => {
+        setVal2(m2.toString());
+    }, [m2]);
 
-    const handleMagnitudeChangeLocal = (index: 1 | 2, rawValue: string) => {
-        setError("");
-        const parsed = parseFloat(rawValue.replace(',', '.'));
-        if (!isNaN(parsed)) {
-            index === 1 ? onM1Change(parsed) : onM2Change(parsed);
+    const handleChange = (index: 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        let val = e.target.value;
+        if (/^[0-9]*[.,]?[0-9]*$/.test(val)) {
+            if (index === 1) setVal1(val);
+            else setVal2(val);
+            const normalized = val.replace(",", ".");
+            if (/^[0-9]+(\.[0-9]*)?$/.test(normalized)) {
+                const parsed = parseFloat(normalized);
+                index === 1 ? onM1Change(parsed) : onM2Change(parsed);
+                setError("");
+            }
         }
     };
 
-    const validateInput = (): boolean => {
+    const validateInput = () => {
         if (
             isNaN(m1) || m1 < 1.0 || m1 > 10.0 ||
             isNaN(m2) || m2 < 1.0 || m2 > 10.0
@@ -181,15 +184,11 @@ function CompareTool({
                 <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude1"
-                    {...inputProps}
-                    value={m1.toString()}
-                    onKeyDown={(e) => {
-                        if (e.key === ',') {
-                            e.preventDefault();
-                            handleMagnitudeChangeLocal(1, e.currentTarget.value + '.');
-                        }
-                    }}
-                    onChange={(e) => handleMagnitudeChangeLocal(1, e.target.value)}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="örn. 6.5"
+                    value={val1}
+                    onChange={handleChange(1)}
                     aria-describedby="magnitudesError"
                 />
             </div>
@@ -197,15 +196,11 @@ function CompareTool({
                 <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude2"
-                    {...inputProps}
-                    value={m2.toString()}
-                    onKeyDown={(e) => {
-                        if (e.key === ',') {
-                            e.preventDefault();
-                            handleMagnitudeChangeLocal(2, e.currentTarget.value + '.');
-                        }
-                    }}
-                    onChange={(e) => handleMagnitudeChangeLocal(2, e.target.value)}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="örn. 6.5"
+                    value={val2}
+                    onChange={handleChange(2)}
                     aria-describedby="magnitudesError"
                 />
             </div>
@@ -226,9 +221,9 @@ function ResultDisplay({ results }: { results: EnergyResult[] }) {
         <ul className="results">
             {results.map((item, index) => (
                 <li key={index}>
-                    <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>
-                        {item.icon}
-                    </span>
+          <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>
+            {item.icon}
+          </span>
                     <span>{item.label}: {item.value}</span>
                 </li>
             ))}
@@ -269,40 +264,21 @@ export default function App() {
     };
 
     const calculationResults = useMemo(() => {
-        if (results) {
-            return <ResultDisplay results={results} />;
-        }
+        if (results) return <ResultDisplay results={results} />;
         return null;
     }, [results]);
 
     const renderContent = () => {
-        if (!mode) {
-            return <ModeSelector onSelectMode={setMode} />;
-        }
+        if (!mode) return <ModeSelector onSelectMode={setMode} />;
         return (
             <>
                 {mode === "single" ? (
-                    <EnergyCalculator
-                        magnitude={m1}
-                        onMagnitudeChange={setM1}
-                        onCalculate={handleCalculate}
-                        onReset={reset}
-                    />
+                    <EnergyCalculator magnitude={m1} onMagnitudeChange={setM1} onCalculate={handleCalculate} onReset={reset} />
                 ) : (
-                    <CompareTool
-                        m1={m1}
-                        m2={m2}
-                        onM1Change={setM1}
-                        onM2Change={setM2}
-                        onCalculate={handleCalculate}
-                        onReset={reset}
-                    />
+                    <CompareTool m1={m1} m2={m2} onM1Change={setM1} onM2Change={setM2} onCalculate={handleCalculate} onReset={reset} />
                 )}
-
                 {isLoading && <div className="loading">Hesaplanıyor...</div>}
-
                 {comparison && <div className="content-container"><p className="comparison">{comparison}</p></div>}
-
                 {calculationResults && <div className="content-container">{calculationResults}</div>}
             </>
         );
