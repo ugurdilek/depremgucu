@@ -72,6 +72,15 @@ function EnergyCalculator({
 }) {
     const [error, setError] = useState<string>("");
 
+    // Platforma göre input ayarları
+    const inputProps = useMemo(() => {
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            return { type: "text", inputMode: "decimal" as const, placeholder: "örn. 6.5" };
+        }
+        return { type: "number" as const, step: "0.1", min: "1", max: "10" };
+    }, []);
+
     const handleMagnitudeChangeLocal = (value: number) => {
         setError("");
         onMagnitudeChange(value);
@@ -85,29 +94,25 @@ function EnergyCalculator({
         return true;
     };
 
-    const handleCalculateClick = () => {
-        if (validateInput()) {
-            onCalculate();
-        }
-    };
-
     return (
         <div className="content-container">
             <h1>Enerji Hesaplama</h1>
-
             <div style={{ width: "100%" }}>
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9]*[.,]?[0-9]*"
-                    placeholder="örn. 6.5"
-                    value={magnitude}
+                    {...inputProps}
+                    value={magnitude.toString()}
+                    onKeyDown={(e) => {
+                        if (e.key === ',') {
+                            e.preventDefault();
+                            handleMagnitudeChangeLocal(parseFloat(e.currentTarget.value + '.'));
+                        }
+                    }}
                     onChange={(e) => {
-                        const inputValue = e.target.value.replace(',', '.');
-                        if (/^\d*\.?\d*$/.test(inputValue)) {
-                            handleMagnitudeChangeLocal(parseFloat(inputValue));
+                        const raw = e.target.value.replace(',', '.');
+                        if (/^\d*\.?\d*$/.test(raw)) {
+                            handleMagnitudeChangeLocal(parseFloat(raw));
                         }
                     }}
                     aria-describedby="magnitudeError"
@@ -116,7 +121,7 @@ function EnergyCalculator({
 
             {error && <p className="error" id="magnitudeError">{error}</p>}
 
-            <button onClick={handleCalculateClick}>Hesapla</button>
+            <button onClick={() => validateInput() && onCalculate()}>Hesapla</button>
             <button onClick={onReset} className="secondary-button" aria-label="Ana menüye dön">
                 ↩ Geri
             </button>
@@ -142,12 +147,19 @@ function CompareTool({
 }) {
     const [error, setError] = useState<string>("");
 
-    const handleMagnitudeChangeLocal = (index: number, value: number) => {
+    const inputProps = useMemo(() => {
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            return { type: "text", inputMode: "decimal" as const, placeholder: "örn. 6.5" };
+        }
+        return { type: "number" as const, step: "0.1", min: "1", max: "10" };
+    }, []);
+
+    const handleMagnitudeChangeLocal = (index: 1 | 2, rawValue: string) => {
         setError("");
-        if (index === 1) {
-            onM1Change(value);
-        } else {
-            onM2Change(value);
+        const parsed = parseFloat(rawValue.replace(',', '.'));
+        if (!isNaN(parsed)) {
+            index === 1 ? onM1Change(parsed) : onM2Change(parsed);
         }
     };
 
@@ -162,57 +174,45 @@ function CompareTool({
         return true;
     };
 
-    const handleCalculateClick = () => {
-        if (validateInput()) {
-            onCalculate();
-        }
-    };
-
     return (
         <div className="content-container">
             <h1>Deprem Karşılaştırma</h1>
-
             <div style={{ width: "100%" }}>
                 <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude1"
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9]*[.,]?[0-9]*"
-                    placeholder="örn. 6.5"
-                    value={m1}
-                    onChange={(e) => {
-                        const inputValue = e.target.value.replace(',', '.');
-                        if (/^\d*\.?\d*$/.test(inputValue)) {
-                            handleMagnitudeChangeLocal(1, parseFloat(inputValue));
+                    {...inputProps}
+                    value={m1.toString()}
+                    onKeyDown={(e) => {
+                        if (e.key === ',') {
+                            e.preventDefault();
+                            handleMagnitudeChangeLocal(1, e.currentTarget.value + '.');
                         }
                     }}
+                    onChange={(e) => handleMagnitudeChangeLocal(1, e.target.value)}
                     aria-describedby="magnitudesError"
                 />
             </div>
-
             <div style={{ width: "100%" }}>
                 <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude2"
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9]*[.,]?[0-9]*"
-                    placeholder="örn. 6.5"
-                    value={m2}
-                    onChange={(e) => {
-                        const inputValue = e.target.value.replace(',', '.');
-                        if (/^\d*\.?\d*$/.test(inputValue)) {
-                            handleMagnitudeChangeLocal(2, parseFloat(inputValue));
+                    {...inputProps}
+                    value={m2.toString()}
+                    onKeyDown={(e) => {
+                        if (e.key === ',') {
+                            e.preventDefault();
+                            handleMagnitudeChangeLocal(2, e.currentTarget.value + '.');
                         }
                     }}
+                    onChange={(e) => handleMagnitudeChangeLocal(2, e.target.value)}
                     aria-describedby="magnitudesError"
                 />
             </div>
 
             {error && <p className="error" id="magnitudesError">{error}</p>}
 
-            <button onClick={handleCalculateClick}>Hesapla</button>
+            <button onClick={() => validateInput() && onCalculate()}>Hesapla</button>
             <button onClick={onReset} className="secondary-button" aria-label="Ana menüye dön">
                 ↩ Geri
             </button>
