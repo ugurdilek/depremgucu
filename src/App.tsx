@@ -72,12 +72,6 @@ function EnergyCalculator({
     onReset: () => void;
 }) {
     const [error, setError] = useState<string>("");
-
-    const handleMagnitudeChange = (value: number) => {
-        setError("");
-        onMagnitudeChange(value);
-    };
-
     const validateInput = (): boolean => {
         if (isNaN(magnitude) || magnitude < 1.0 || magnitude > 10.0) {
             setError("Lütfen 1.0 ile 10.0 arasında geçerli bir büyüklük giriniz.");
@@ -96,13 +90,21 @@ function EnergyCalculator({
         <div className="content-container">
             <h1>Enerji Hesaplama</h1>
 
-            <div style={{ width: "100%" }}>
+            <div style={{width: "100%"}}>
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
                     type="number"
                     value={magnitude}
-                    onChange={(e) => handleMagnitudeChange(parseFloat(e.target.value))}
+                    onChange={(e) => {
+                        // Geçerli bir sayı veya nokta (.) kontrolü
+                        const inputValue = e.target.value;
+
+                        // Eğer girilen değer geçerli bir sayı (veya decimal) değilse, değeri değiştirme
+                        if (/^\d*\.?\d*$/.test(inputValue)) {
+                            onMagnitudeChange(parseFloat(inputValue));
+                        }
+                    }}
                     step="0.1"
                     min="1.0"
                     max="10.0"
