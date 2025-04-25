@@ -54,7 +54,7 @@ export default function App() {
                 return;
             }
             setComparison(compareMagnitudes(m1, m2));
-            setResult(""); // Enerji verilerini göstermiyoruz
+            setResult("");
         }
     };
 
@@ -83,7 +83,7 @@ export default function App() {
                     <h1>{mode === "single" ? "Enerji Hesaplama" : "Deprem Karşılaştırma"}</h1>
 
                     <div style={{ width: "100%" }}>
-                        <label>1. Deprem Büyüklüğü (Mw):</label>
+                        <label>1. Depremin Büyüklüğü (Mw):</label>
                         <input
                             type="number"
                             value={m1}
@@ -96,7 +96,7 @@ export default function App() {
 
                     {mode === "compare" && (
                         <div style={{ width: "100%" }}>
-                            <label>2. Deprem Büyüklüğü (Mw):</label>
+                            <label>2. Depremin Büyüklüğü (Mw):</label>
                             <input
                                 type="number"
                                 value={m2}
