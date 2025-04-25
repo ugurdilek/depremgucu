@@ -182,7 +182,7 @@ function CompareTool({
                 <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude1"
-                    type="text"  // Burada da "text" tipi kullanılıyor
+                    type="text"  // Burada "text" tipi kullanılıyor
                     value={m1}
                     onChange={(e) => handleMagnitudeChange(1, parseFloat(e.target.value))}
                     step="0.1"
