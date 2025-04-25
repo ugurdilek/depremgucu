@@ -1,4 +1,4 @@
-import {useState, useMemo, JSX} from "react";
+import { useState, useMemo, JSX } from "react";
 import "./App.css";
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
@@ -72,6 +72,12 @@ function EnergyCalculator({
     onReset: () => void;
 }) {
     const [error, setError] = useState<string>("");
+
+    const handleMagnitudeChange = (value: number) => {
+        setError("");
+        onMagnitudeChange(value);
+    };
+
     const validateInput = (): boolean => {
         if (isNaN(magnitude) || magnitude < 1.0 || magnitude > 10.0) {
             setError("Lütfen 1.0 ile 10.0 arasında geçerli bir büyüklük giriniz.");
@@ -90,18 +96,18 @@ function EnergyCalculator({
         <div className="content-container">
             <h1>Enerji Hesaplama</h1>
 
-            <div style={{width: "100%"}}>
+            <div style={{ width: "100%" }}>
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
-                    type="text"  // Değişiklik burada: "number" yerine "text"
+                    type="number"  // Bu kısımda 'number' tipi kullanıyoruz
                     value={magnitude}
                     onChange={(e) => {
                         const inputValue = e.target.value;
 
-                        // Sayıyı geçerli olup olmadığını kontrol et
+                        // Geçerli bir sayı veya nokta (.) kontrolü
                         if (/^\d*\.?\d*$/.test(inputValue)) {
-                            onMagnitudeChange(parseFloat(inputValue));
+                            handleMagnitudeChange(parseFloat(inputValue));
                         }
                     }}
                     step="0.1"
@@ -213,9 +219,9 @@ function ResultDisplay({ results }: { results: EnergyResult[] }) {
         <ul className="results">
             {results.map((item, index) => (
                 <li key={index}>
-          <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>
-            {item.icon}
-          </span>
+                    <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>
+                        {item.icon}
+                    </span>
                     <span>{item.label}: {item.value}</span>
                 </li>
             ))}
