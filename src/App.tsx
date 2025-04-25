@@ -75,7 +75,7 @@ export default function App() {
 
     // Input değer değişimi
     const handleMagnitudeChange = (index: number, value: string) => {
-        const input = value.replace(",", ".");
+        const input = value; // virgül zaten dışarıda nokta yapılmış
 
         if (input === '') {
             if (index === 1) {
@@ -100,6 +100,7 @@ export default function App() {
             }
         }
     };
+
 
     // Uygulamayı sıfırla
     const reset = () => {
