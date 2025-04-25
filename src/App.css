@@ -33,6 +33,13 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.error {
+    color: var(--error);
+    margin-top: 8px;
+    font-weight: 600;
+    text-align: center;
+}
+
 .App {
     background-color: var(--card-bg);
     color: var(--text);

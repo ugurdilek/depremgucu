@@ -46,38 +46,59 @@ export default function App() {
     const [results, setResults] = useState<EnergyResult[] | null>(null);
     const [comparison, setComparison] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const { calculateEnergy, compareMagnitudes } = useEarthquakeCalculator();
-
-    // Magnitude input değişimi
-    const handleMagnitudeChange = (index: number, value: string) => {
-        const input = value.replace(",", ".");
-        if (input === '') {
-            index === 1 ? setM1('') : setM2('');
-        } else {
-            const parsed = parseFloat(input);
-            if (!isNaN(parsed)) {
-                index === 1 ? setM1(parsed) : setM2(parsed);
-            }
-        }
-    };
 
     // Deprem büyüklüğüne göre hesaplama yap
     const handleCalculate = () => {
         if (typeof m1 !== 'number' || (mode === "compare" && typeof m2 !== 'number')) {
-            return; // Geçersiz giriş varsa hesaplama yapma
+            setError("Geçerli büyüklük değerleri giriniz.");
+            return;
         }
+
         setIsLoading(true);
         setTimeout(() => {
             if (mode === "single") {
                 setResults(calculateEnergy(m1));
                 setComparison("");
             } else if (mode === "compare") {
-                setComparison(compareMagnitudes(m1, m2));
+                if (typeof m2 === 'number') {
+                    setComparison(compareMagnitudes(m1, m2));
+                }
                 setResults(null);
             }
             setIsLoading(false);
         }, 300);
+    };
+
+
+    // Input değer değişimi
+    const handleMagnitudeChange = (index: number, value: string) => {
+        const input = value.replace(",", ".");
+
+        if (input === '') {
+            if (index === 1) {
+                setM1('');
+            } else {
+                setM2('');
+            }
+            setError(null);
+        } else {
+            const parsed = parseFloat(input);
+            if (!isNaN(parsed)) {
+                if (parsed >= 1.0 && parsed <= 10.0) {
+                    if (index === 1) {
+                        setM1(parsed);
+                    } else {
+                        setM2(parsed);
+                    }
+                    setError(null);
+                } else {
+                    setError("Lütfen 1.0 ile 10.0 arasında bir değer giriniz.");
+                }
+            }
+        }
     };
 
     // Uygulamayı sıfırla
@@ -87,6 +108,7 @@ export default function App() {
         setComparison("");
         setM1('');
         setM2('');
+        setError(null);
     };
 
     const renderContent = () => {
@@ -118,6 +140,7 @@ export default function App() {
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.5"
                         />
+                        {error && <p className="error">{error}</p>}
                         <button onClick={handleCalculate}>Hesapla</button>
                         <button onClick={reset} className="secondary-button">↩ Geri</button>
                     </div>
@@ -142,6 +165,7 @@ export default function App() {
                             onChange={(e) => handleMagnitudeChange(2, e.target.value)}
                             placeholder="Örn: 7.0"
                         />
+                        {error && <p className="error">{error}</p>}
                         <button onClick={handleCalculate}>Hesapla</button>
                         <button onClick={reset} className="secondary-button">↩ Geri</button>
                     </div>
