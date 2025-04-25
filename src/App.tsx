@@ -1,16 +1,18 @@
 import { useState, useMemo, JSX } from "react";
-import "./App.css"; // CSS import yorum satırına alındı, yoksa hata verebilir
+import "./App.css";
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
 import { WiDayLightning } from "react-icons/wi";
 import { RiScales3Line } from "react-icons/ri";
 
+// Tip tanımlamaları
 interface EnergyResult {
     label: string;
     value: string;
     icon: JSX.Element;
 }
 
+// Custom hook
 function useEarthquakeCalculator() {
     const calculateEnergy = (magnitude: number): EnergyResult[] => {
         const joules = Math.pow(10, 1.5 * magnitude + 4.8);
@@ -32,14 +34,15 @@ function useEarthquakeCalculator() {
 
         if (factor === 1) return "Her iki deprem eşit büyüklüktedir.";
         if (factor > 1)
-            return `${m2.toFixed(1)} büyüklüğündeki deprem, ${m1.toFixed(1)} büyüklüğündeki depremden yaklaşık ${factor.toFixed(1)} kat daha güçlüdür.`;
+            return `${m2.toFixed(1)} büyüklüğündeki deprem, ${m1.toFixed(1)} büyüklüğündekinden yaklaşık ${factor.toFixed(1)} kat daha güçlüdür.`;
         else
-            return `${m1.toFixed(1)} büyüklüğündeki deprem, ${m2.toFixed(1)} büyüklüğündeki depremden yaklaşık ${(1 / factor).toFixed(1)} kat daha güçlüdür.`;
+            return `${m1.toFixed(1)} büyüklüğündeki deprem, ${m2.toFixed(1)} büyüklüğündekinden yaklaşık ${(1 / factor).toFixed(1)} kat daha güçlüdür.`;
     };
 
     return { calculateEnergy, compareMagnitudes };
 }
 
+// ModeSelector Bileşeni
 function ModeSelector({ onSelectMode }: { onSelectMode: (mode: "single" | "compare") => void }) {
     return (
         <div className="content-container">
@@ -56,43 +59,7 @@ function ModeSelector({ onSelectMode }: { onSelectMode: (mode: "single" | "compa
     );
 }
 
-function MagnitudeInput({
-                            id,
-                            label,
-                            value,
-                            onChange,
-                        }: {
-    id: string;
-    label: string;
-    value: number;
-    onChange: (value: number) => void;
-}) {
-    const [inputValue, setInputValue] = useState(value.toString());
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        setInputValue(val);
-        const numericVal = parseFloat(val);
-        if (!isNaN(numericVal)) {
-            onChange(numericVal);
-        }
-    };
-
-    return (
-        <div style={{ width: "100%" }}>
-            <label htmlFor={id}>{label}</label>
-            <input
-                id={id}
-                type="text"
-                inputMode="decimal"
-                value={inputValue}
-                onChange={handleChange}
-                aria-describedby={`${id}Error`}
-            />
-        </div>
-    );
-}
-
+// EnergyCalculator Bileşeni
 function EnergyCalculator({
                               magnitude,
                               onMagnitudeChange,
@@ -104,7 +71,12 @@ function EnergyCalculator({
     onCalculate: () => void;
     onReset: () => void;
 }) {
-    const [error, setError] = useState("");
+    const [error, setError] = useState<string>("");
+
+    const handleMagnitudeChange = (value: number) => {
+        setError("");
+        onMagnitudeChange(value);
+    };
 
     const validateInput = (): boolean => {
         if (isNaN(magnitude) || magnitude < 1.0 || magnitude > 10.0) {
@@ -115,28 +87,50 @@ function EnergyCalculator({
     };
 
     const handleCalculateClick = () => {
-        if (validateInput()) onCalculate();
+        if (validateInput()) {
+            onCalculate();
+        }
     };
 
     return (
         <div className="content-container">
             <h1>Enerji Hesaplama</h1>
-            <MagnitudeInput
-                id="magnitude"
-                label="Depremin Büyüklüğü (Mw):"
-                value={magnitude}
-                onChange={(val) => {
-                    setError("");
-                    onMagnitudeChange(val);
-                }}
-            />
+
+            <div style={{ width: "100%" }}>
+                <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
+                <input
+                    id="magnitude"
+                    type="number"  // `number` tipi kullanıyoruz
+                    value={magnitude}
+                    onChange={(e) => {
+                        let inputValue = e.target.value;
+
+                        // Eğer virgül varsa, virgülü noktaya çeviriyoruz
+                        inputValue = inputValue.replace(',', '.');
+
+                        // Geçerli bir sayı veya nokta (.) kontrolü
+                        if (/^\d*\.?\d*$/.test(inputValue)) {
+                            handleMagnitudeChange(parseFloat(inputValue));
+                        }
+                    }}
+                    step="0.1"
+                    min="1.0"
+                    max="10.0"
+                    aria-describedby="magnitudeError"
+                />
+            </div>
+
             {error && <p className="error" id="magnitudeError">{error}</p>}
+
             <button onClick={handleCalculateClick}>Hesapla</button>
-            <button onClick={onReset} className="secondary-button">↩ Geri</button>
+            <button onClick={onReset} className="secondary-button" aria-label="Ana menüye dön">
+                ↩ Geri
+            </button>
         </div>
     );
 }
 
+// CompareTool Bileşeni
 function CompareTool({
                          m1,
                          m2,
@@ -152,7 +146,16 @@ function CompareTool({
     onCalculate: () => void;
     onReset: () => void;
 }) {
-    const [error, setError] = useState("");
+    const [error, setError] = useState<string>("");
+
+    const handleMagnitudeChange = (index: number, value: number) => {
+        setError("");
+        if (index === 1) {
+            onM1Change(value);
+        } else {
+            onM2Change(value);
+        }
+    };
 
     const validateInput = (): boolean => {
         if (
@@ -166,27 +169,60 @@ function CompareTool({
     };
 
     const handleCalculateClick = () => {
-        if (validateInput()) onCalculate();
+        if (validateInput()) {
+            onCalculate();
+        }
     };
 
     return (
         <div className="content-container">
             <h1>Deprem Karşılaştırma</h1>
-            <MagnitudeInput id="magnitude1" label="1. Depremin Büyüklüğü (Mw):" value={m1} onChange={(v) => { setError(""); onM1Change(v); }} />
-            <MagnitudeInput id="magnitude2" label="2. Depremin Büyüklüğü (Mw):" value={m2} onChange={(v) => { setError(""); onM2Change(v); }} />
+
+            <div style={{ width: "100%" }}>
+                <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
+                <input
+                    id="magnitude1"
+                    type="number"
+                    value={m1}
+                    onChange={(e) => handleMagnitudeChange(1, parseFloat(e.target.value))}
+                    step="0.1"
+                    min="1.0"
+                    max="10.0"
+                    aria-describedby="magnitudesError"
+                />
+            </div>
+
+            <div style={{ width: "100%" }}>
+                <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
+                <input
+                    id="magnitude2"
+                    type="number"
+                    value={m2}
+                    onChange={(e) => handleMagnitudeChange(2, parseFloat(e.target.value))}
+                    step="0.1"
+                    min="1.0"
+                    max="10.0"
+                    aria-describedby="magnitudesError"
+                />
+            </div>
+
             {error && <p className="error" id="magnitudesError">{error}</p>}
+
             <button onClick={handleCalculateClick}>Hesapla</button>
-            <button onClick={onReset} className="secondary-button">↩ Geri</button>
+            <button onClick={onReset} className="secondary-button" aria-label="Ana menüye dön">
+                ↩ Geri
+            </button>
         </div>
     );
 }
 
+// ResultDisplay Bileşeni
 function ResultDisplay({ results }: { results: EnergyResult[] }) {
     return (
-        <ul className="results" aria-live="polite">
+        <ul className="results">
             {results.map((item, index) => (
                 <li key={index}>
-                    <span className={`icon ${item.label.toLocaleLowerCase("tr").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-')}`}>
+                    <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>
                         {item.icon}
                     </span>
                     <span>{item.label}: {item.value}</span>
@@ -208,6 +244,8 @@ export default function App() {
 
     const handleCalculate = () => {
         setIsLoading(true);
+
+        // Küçük bir gecikme ile hesaplama sonuçlarının gösterilmesi
         setTimeout(() => {
             if (mode === "single") {
                 setResults(calculateEnergy(m1));
@@ -228,24 +266,51 @@ export default function App() {
         setM2(7.0);
     };
 
-    const calculationResults = useMemo(() => results && <ResultDisplay results={results} />, [results]);
+    const calculationResults = useMemo(() => {
+        if (results) {
+            return <ResultDisplay results={results} />;
+        }
+        return null;
+    }, [results]);
+
+    // Ana içerik bileşenini belirliyoruz
+    const renderContent = () => {
+        if (!mode) {
+            return <ModeSelector onSelectMode={setMode} />;
+        }
+
+        return (
+            <>
+                {mode === "single" ? (
+                    <EnergyCalculator
+                        magnitude={m1}
+                        onMagnitudeChange={setM1}
+                        onCalculate={handleCalculate}
+                        onReset={reset}
+                    />
+                ) : (
+                    <CompareTool
+                        m1={m1}
+                        m2={m2}
+                        onM1Change={setM1}
+                        onM2Change={setM2}
+                        onCalculate={handleCalculate}
+                        onReset={reset}
+                    />
+                )}
+
+                {isLoading && <div className="loading">Hesaplanıyor...</div>}
+
+                {comparison && <div className="content-container"><p className="comparison">{comparison}</p></div>}
+
+                {calculationResults && <div className="content-container">{calculationResults}</div>}
+            </>
+        );
+    };
 
     return (
         <div className="App">
-            {!mode ? (
-                <ModeSelector onSelectMode={setMode} />
-            ) : (
-                <>
-                    {mode === "single" ? (
-                        <EnergyCalculator magnitude={m1} onMagnitudeChange={setM1} onCalculate={handleCalculate} onReset={reset} />
-                    ) : (
-                        <CompareTool m1={m1} m2={m2} onM1Change={setM1} onM2Change={setM2} onCalculate={handleCalculate} onReset={reset} />
-                    )}
-                    {isLoading && <div className="loading">Hesaplanıyor...</div>}
-                    {comparison && <div className="content-container"><p className="comparison">{comparison}</p></div>}
-                    {calculationResults && <div className="content-container">{calculationResults}</div>}
-                </>
-            )}
+            {renderContent()}
         </div>
     );
 }
