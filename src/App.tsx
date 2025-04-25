@@ -100,10 +100,13 @@ function EnergyCalculator({
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
-                    type="number"  // Bu kısımda 'number' tipi kullanıyoruz
+                    type="number"  // `number` tipi kullanıyoruz
                     value={magnitude}
                     onChange={(e) => {
-                        const inputValue = e.target.value;
+                        let inputValue = e.target.value;
+
+                        // Eğer virgül varsa, virgülü noktaya çeviriyoruz
+                        inputValue = inputValue.replace(',', '.');
 
                         // Geçerli bir sayı veya nokta (.) kontrolü
                         if (/^\d*\.?\d*$/.test(inputValue)) {
