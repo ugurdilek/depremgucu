@@ -1,9 +1,8 @@
-import { useState, useMemo, JSX, useEffect } from "react";
+import { useState, JSX } from "react";
 import "./App.css";
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
 import { WiDayLightning } from "react-icons/wi";
-import { RiScales3Line } from "react-icons/ri";
 
 // Tip tanımlamaları
 interface EnergyResult {
@@ -47,12 +46,8 @@ function ModeSelector({ onSelectMode }: { onSelectMode: (mode: "single" | "compa
         <div className="content-container">
             <h1>Deprem Gücü Hesaplayıcı</h1>
             <p>Ne yapmak istiyorsunuz?</p>
-            <button onClick={() => onSelectMode("single")} aria-label="Enerji hesaplama modunu seç">
-                🔹 Enerji Hesapla
-            </button>
-            <button onClick={() => onSelectMode("compare")} aria-label="Deprem karşılaştırma modunu seç">
-                <RiScales3Line style={{ marginRight: "6px" }} /> Depremleri Karşılaştır
-            </button>
+            <button onClick={() => onSelectMode("single")}>🔹 Enerji Hesapla</button>
+            <button onClick={() => onSelectMode("compare")}>Depremleri Karşılaştır</button>
         </div>
     );
 }
@@ -69,58 +64,47 @@ function EnergyCalculator({
     onCalculate: () => void;
     onReset: () => void;
 }) {
-    const [error, setError] = useState<string>("");
     const [inputVal, setInputVal] = useState<string>(magnitude.toString());
-
-    useEffect(() => {
-        setInputVal(magnitude.toString());
-    }, [magnitude]);
+    const [error, setError] = useState<string>("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
-        // sadece rakam, nokta veya virgül
         if (/^[0-9]*[.,]?[0-9]*$/.test(val)) {
             setInputVal(val);
-            const normalized = val.replace(",", ".");
-            // tam sayı veya ondalık nokta izleyen rakamlar
-            if (/^[0-9]+(\.[0-9]*)?$/.test(normalized)) {
-                const parsed = parseFloat(normalized);
-                onMagnitudeChange(parsed);
-                setError("");
-            }
+            setError("");
         }
     };
 
-    const validateInput = () => {
-        if (isNaN(magnitude) || magnitude < 1.0 || magnitude > 10.0) {
-            setError("Lütfen 1.0 ile 10.0 arasında geçerli bir büyüklük giriniz.");
-            return false;
+    const handleCalculate = () => {
+        const normalized = inputVal.replace(",", ".");
+        if (!/^[0-9]+(\.[0-9]+)?$/.test(normalized)) {
+            setError("Lütfen geçerli bir sayı giriniz (örn. 6.5)");
+            return;
         }
-        return true;
+        const parsed = parseFloat(normalized);
+        if (isNaN(parsed) || parsed < 1 || parsed > 10) {
+            setError("Lütfen 1.0 ile 10.0 arasında bir değer giriniz.");
+            return;
+        }
+        onMagnitudeChange(parsed);
+        onCalculate();
     };
 
     return (
         <div className="content-container">
             <h1>Enerji Hesaplama</h1>
-            <div style={{ width: "100%" }}>
-                <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
-                <input
-                    id="magnitude"
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="örn. 6.5"
-                    value={inputVal}
-                    onChange={handleChange}
-                    aria-describedby="magnitudeError"
-                />
-            </div>
-
-            {error && <p className="error" id="magnitudeError">{error}</p>}
-
-            <button onClick={() => validateInput() && onCalculate()}>Hesapla</button>
-            <button onClick={onReset} className="secondary-button" aria-label="Ana menüye dön">
-                ↩ Geri
-            </button>
+            <label htmlFor="magnitude">Büyüklük (Mw):</label>
+            <input
+                id="magnitude"
+                type="text"
+                inputMode="decimal"
+                placeholder="6.5"
+                value={inputVal}
+                onChange={handleChange}
+            />
+            {error && <p className="error">{error}</p>}
+            <button onClick={handleCalculate}>Hesapla</button>
+            <button onClick={onReset} className="secondary-button">↩ Geri</button>
         </div>
     );
 }
@@ -141,77 +125,53 @@ function CompareTool({
     onCalculate: () => void;
     onReset: () => void;
 }) {
-    const [error, setError] = useState<string>("");
     const [val1, setVal1] = useState<string>(m1.toString());
     const [val2, setVal2] = useState<string>(m2.toString());
+    const [error, setError] = useState<string>("");
 
-    useEffect(() => {
-        setVal1(m1.toString());
-    }, [m1]);
-    useEffect(() => {
-        setVal2(m2.toString());
-    }, [m2]);
-
-    const handleChange = (index: 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        if (/^[0-9]*[.,]?[0-9]*$/.test(val)) {
-            if (index === 1) setVal1(val);
-            else setVal2(val);
-            const normalized = val.replace(",", ".");
-            if (/^[0-9]+(\.[0-9]*)?$/.test(normalized)) {
-                const parsed = parseFloat(normalized);
-                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                index === 1 ? onM1Change(parsed) : onM2Change(parsed);
-                setError("");
-            }
+    const handleChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const v = e.target.value;
+        if (/^[0-9]*[.,]?[0-9]*$/.test(v)) {
+            setVal1(v);
+            setError("");
+        }
+    };
+    const handleChange2 = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const v = e.target.value;
+        if (/^[0-9]*[.,]?[0-9]*$/.test(v)) {
+            setVal2(v);
+            setError("");
         }
     };
 
-    const validateInput = () => {
-        if (
-            isNaN(m1) || m1 < 1.0 || m1 > 10.0 ||
-            isNaN(m2) || m2 < 1.0 || m2 > 10.0
-        ) {
-            setError("Lütfen 1.0 ile 10.0 arasında geçerli büyüklükler giriniz.");
-            return false;
+    const handleCalculate = () => {
+        const n1 = val1.replace(",", ".");
+        const n2 = val2.replace(",", ".");
+        if (!/^[0-9]+(\.[0-9]+)?$/.test(n1) || !/^[0-9]+(\.[0-9]+)?$/.test(n2)) {
+            setError("Lütfen geçerli sayılar giriniz");
+            return;
         }
-        return true;
+        const p1 = parseFloat(n1);
+        const p2 = parseFloat(n2);
+        if ([p1, p2].some(x => isNaN(x) || x < 1 || x > 10)) {
+            setError("1.0 ile 10.0 arasında değerler giriniz");
+            return;
+        }
+        onM1Change(p1);
+        onM2Change(p2);
+        onCalculate();
     };
 
     return (
         <div className="content-container">
             <h1>Deprem Karşılaştırma</h1>
-            <div style={{ width: "100%" }}>
-                <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
-                <input
-                    id="magnitude1"
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="örn. 6.5"
-                    value={val1}
-                    onChange={handleChange(1)}
-                    aria-describedby="magnitudesError"
-                />
-            </div>
-            <div style={{ width: "100%" }}>
-                <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
-                <input
-                    id="magnitude2"
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="örn. 6.5"
-                    value={val2}
-                    onChange={handleChange(2)}
-                    aria-describedby="magnitudesError"
-                />
-            </div>
-
-            {error && <p className="error" id="magnitudesError">{error}</p>}
-
-            <button onClick={() => validateInput() && onCalculate()}>Hesapla</button>
-            <button onClick={onReset} className="secondary-button" aria-label="Ana menüye dön">
-                ↩ Geri
-            </button>
+            <label htmlFor="m1">1. Deprem (Mw):</label>
+            <input id="m1" type="text" inputMode="decimal" value={val1} onChange={handleChange1} />
+            <label htmlFor="m2">2. Deprem (Mw):</label>
+            <input id="m2" type="text" inputMode="decimal" value={val2} onChange={handleChange2} />
+            {error && <p className="error">{error}</p>}
+            <button onClick={handleCalculate}>Hesapla</button>
+            <button onClick={onReset} className="secondary-button">↩ Geri</button>
         </div>
     );
 }
@@ -222,9 +182,7 @@ function ResultDisplay({ results }: { results: EnergyResult[] }) {
         <ul className="results">
             {results.map((item, index) => (
                 <li key={index}>
-          <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>
-            {item.icon}
-          </span>
+                    <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>{item.icon}</span>
                     <span>{item.label}: {item.value}</span>
                 </li>
             ))}
@@ -232,58 +190,38 @@ function ResultDisplay({ results }: { results: EnergyResult[] }) {
     );
 }
 
+// Ana App
 export default function App() {
     const [mode, setMode] = useState<"single" | "compare" | null>(null);
-    const [m1, setM1] = useState(6.0);
-    const [m2, setM2] = useState(7.0);
+    const [m1, setM1] = useState(6);
+    const [m2, setM2] = useState(7);
     const [results, setResults] = useState<EnergyResult[] | null>(null);
-    const [comparison, setComparison] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-
+    const [comparison, setComparison] = useState<string>("");
     const { calculateEnergy, compareMagnitudes } = useEarthquakeCalculator();
 
     const handleCalculate = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            if (mode === "single") {
-                setResults(calculateEnergy(m1));
-                setComparison("");
-            } else if (mode === "compare") {
-                setComparison(compareMagnitudes(m1, m2));
-                setResults(null);
-            }
-            setIsLoading(false);
-        }, 300);
+        if (mode === "single") {
+            setResults(calculateEnergy(m1));
+            setComparison("");
+        } else {
+            setComparison(compareMagnitudes(m1, m2));
+            setResults(null);
+        }
     };
 
-    const reset = () => {
-        setMode(null);
-        setResults(null);
-        setComparison("");
-        setM1(6.0);
-        setM2(7.0);
-    };
+    const reset = () => { setMode(null); setResults(null); setComparison(""); setM1(6); setM2(7); };
 
-    const calculationResults = useMemo(() => {
-        if (results) return <ResultDisplay results={results} />;
-        return null;
-    }, [results]);
-
-    const renderContent = () => {
-        if (!mode) return <ModeSelector onSelectMode={setMode} />;
-        return (
-            <>
-                {mode === "single" ? (
-                    <EnergyCalculator magnitude={m1} onMagnitudeChange={setM1} onCalculate={handleCalculate} onReset={reset} />
-                ) : (
-                    <CompareTool m1={m1} m2={m2} onM1Change={setM1} onM2Change={setM2} onCalculate={handleCalculate} onReset={reset} />
-                )}
-                {isLoading && <div className="loading">Hesaplanıyor...</div>}
-                {comparison && <div className="content-container"><p className="comparison">{comparison}</p></div>}
-                {calculationResults && <div className="content-container">{calculationResults}</div>}
-            </>
-        );
-    };
-
-    return <div className="App">{renderContent()}</div>;
+    return (
+        <div className="App">
+            {!mode ? (
+                <ModeSelector onSelectMode={setMode} />
+            ) : mode === "single" ? (
+                <EnergyCalculator magnitude={m1} onMagnitudeChange={setM1} onCalculate={handleCalculate} onReset={reset} />
+            ) : (
+                <CompareTool m1={m1} m2={m2} onM1Change={setM1} onM2Change={setM2} onCalculate={handleCalculate} onReset={reset} />
+            )}
+            {results && <ResultDisplay results={results} />}
+            {comparison && <div className="content-container"><p className="comparison">{comparison}</p></div>}
+        </div>
+    );
 }
