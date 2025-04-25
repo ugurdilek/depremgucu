@@ -4,7 +4,8 @@
   margin-top: 50px;
 }
 
-input {
+input[type="number"],
+input[type="range"] {
   padding: 8px;
   margin: 10px;
   border-radius: 4px;
@@ -34,4 +35,16 @@ pre {
   border-radius: 4px;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+@media (max-width: 600px) {
+  .App {
+    padding: 20px;
+  }
+
+  input[type="number"],
+  input[type="range"],
+  button {
+    width: 100%;
+  }
 }
