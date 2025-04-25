@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {JSX, useState} from "react";
 import "./App.css";
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
@@ -50,24 +50,7 @@ export default function App() {
 
     const { calculateEnergy, compareMagnitudes } = useEarthquakeCalculator();
 
-    // Devtools tespiti
-    useEffect(() => {
-        const detectDevTools = () => {
-            const threshold = 160;
-            const widthDiff = window.outerWidth - window.innerWidth > threshold;
-            const heightDiff = window.outerHeight - window.innerHeight > threshold;
-
-            if (widthDiff || heightDiff) {
-                alert("Geliştirici araçlarını kullanmak yasaktır!");
-                // document.body.innerHTML = ""; // istersen içerik silinebilir
-            }
-        };
-
-        window.addEventListener("resize", detectDevTools);
-        return () => window.removeEventListener("resize", detectDevTools);
-    }, []);
-
-    // Hesapla butonu
+    // Deprem büyüklüğüne göre hesaplama yap
     const handleCalculate = () => {
         if (typeof m1 !== 'number' || (mode === "compare" && typeof m2 !== 'number')) {
             setError("Geçerli büyüklük değerleri giriniz.");
@@ -80,25 +63,36 @@ export default function App() {
                 setResults(calculateEnergy(m1));
                 setComparison("");
             } else if (mode === "compare") {
-                setComparison(compareMagnitudes(m1, m2));
+                if (typeof m2 === 'number') {
+                    setComparison(compareMagnitudes(m1, m2));
+                }
                 setResults(null);
             }
             setIsLoading(false);
         }, 300);
     };
 
-    // Değer girildiğinde
+
+    // Input değer değişimi
     const handleMagnitudeChange = (index: number, value: string) => {
-        const input = value.replace(",", ".");
+        const input = value; // virgül zaten dışarıda nokta yapılmış
 
         if (input === '') {
-            index === 1 ? setM1('') : setM2('');
+            if (index === 1) {
+                setM1('');
+            } else {
+                setM2('');
+            }
             setError(null);
         } else {
             const parsed = parseFloat(input);
             if (!isNaN(parsed)) {
                 if (parsed >= 1.0 && parsed <= 10.0) {
-                    index === 1 ? setM1(parsed) : setM2(parsed);
+                    if (index === 1) {
+                        setM1(parsed);
+                    } else {
+                        setM2(parsed);
+                    }
                     setError(null);
                 } else {
                     setError("Lütfen 1.0 ile 10.0 arasında bir değer giriniz.");
@@ -107,7 +101,8 @@ export default function App() {
         }
     };
 
-    // Sıfırla
+
+    // Uygulamayı sıfırla
     const reset = () => {
         setMode(null);
         setResults(null);
@@ -140,9 +135,9 @@ export default function App() {
                         <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                         <input
                             id="magnitude"
-                            type="text"
-                            inputMode="decimal"
-                            value={typeof m1 === 'number' ? m1.toString() : m1}
+                            type="number"
+                            step="any"
+                            value={m1}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.5"
                         />
@@ -156,18 +151,18 @@ export default function App() {
                         <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                         <input
                             id="magnitude1"
-                            type="text"
-                            inputMode="decimal"
-                            value={typeof m1 === 'number' ? m1.toString() : m1}
+                            type="number"
+                            step="any"
+                            value={m1}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.0"
                         />
                         <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
                         <input
                             id="magnitude2"
-                            type="text"
-                            inputMode="decimal"
-                            value={typeof m2 === 'number' ? m2.toString() : m2}
+                            type="number"
+                            step="any"
+                            value={m2}
                             onChange={(e) => handleMagnitudeChange(2, e.target.value)}
                             placeholder="Örn: 7.0"
                         />
