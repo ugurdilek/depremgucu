@@ -77,7 +77,7 @@ function EnergyCalculator({
     }, [magnitude]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value;
+        const val = e.target.value;
         // sadece rakam, nokta veya virgül
         if (/^[0-9]*[.,]?[0-9]*$/.test(val)) {
             setInputVal(val);
@@ -153,13 +153,14 @@ function CompareTool({
     }, [m2]);
 
     const handleChange = (index: 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value;
+        const val = e.target.value;
         if (/^[0-9]*[.,]?[0-9]*$/.test(val)) {
             if (index === 1) setVal1(val);
             else setVal2(val);
             const normalized = val.replace(",", ".");
             if (/^[0-9]+(\.[0-9]*)?$/.test(normalized)) {
                 const parsed = parseFloat(normalized);
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                 index === 1 ? onM1Change(parsed) : onM2Change(parsed);
                 setError("");
             }
