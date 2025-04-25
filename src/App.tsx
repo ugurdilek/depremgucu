@@ -52,8 +52,7 @@ function ModeSelector({ onSelectMode }: { onSelectMode: (mode: "single" | "compa
                 🔹 Enerji Hesapla
             </button>
             <button onClick={() => onSelectMode("compare")} aria-label="Deprem karşılaştırma modunu seç">
-                <RiScales3Line style={{ marginRight: "6px" }} />
-                Depremleri Karşılaştır
+                <RiScales3Line style={{ marginRight: "6px" }} /> Depremleri Karşılaştır
             </button>
         </div>
     );
@@ -73,7 +72,7 @@ function EnergyCalculator({
 }) {
     const [error, setError] = useState<string>("");
 
-    const handleMagnitudeChange = (value: number) => {
+    const handleMagnitudeChangeLocal = (value: number) => {
         setError("");
         onMagnitudeChange(value);
     };
@@ -100,22 +99,17 @@ function EnergyCalculator({
                 <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude"
-                    type="number"  // `number` tipi kullanıyoruz
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    placeholder="örn. 6.5"
                     value={magnitude}
                     onChange={(e) => {
-                        let inputValue = e.target.value;
-
-                        // Eğer virgül varsa, virgülü noktaya çeviriyoruz
-                        inputValue = inputValue.replace(',', '.');
-
-                        // Geçerli bir sayı veya nokta (.) kontrolü
+                        const inputValue = e.target.value.replace(',', '.');
                         if (/^\d*\.?\d*$/.test(inputValue)) {
-                            handleMagnitudeChange(parseFloat(inputValue));
+                            handleMagnitudeChangeLocal(parseFloat(inputValue));
                         }
                     }}
-                    step="0.1"
-                    min="1.0"
-                    max="10.0"
                     aria-describedby="magnitudeError"
                 />
             </div>
@@ -148,7 +142,7 @@ function CompareTool({
 }) {
     const [error, setError] = useState<string>("");
 
-    const handleMagnitudeChange = (index: number, value: number) => {
+    const handleMagnitudeChangeLocal = (index: number, value: number) => {
         setError("");
         if (index === 1) {
             onM1Change(value);
@@ -182,12 +176,17 @@ function CompareTool({
                 <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude1"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    placeholder="örn. 6.5"
                     value={m1}
-                    onChange={(e) => handleMagnitudeChange(1, parseFloat(e.target.value))}
-                    step="0.1"
-                    min="1.0"
-                    max="10.0"
+                    onChange={(e) => {
+                        const inputValue = e.target.value.replace(',', '.');
+                        if (/^\d*\.?\d*$/.test(inputValue)) {
+                            handleMagnitudeChangeLocal(1, parseFloat(inputValue));
+                        }
+                    }}
                     aria-describedby="magnitudesError"
                 />
             </div>
@@ -196,12 +195,17 @@ function CompareTool({
                 <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
                 <input
                     id="magnitude2"
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    placeholder="örn. 6.5"
                     value={m2}
-                    onChange={(e) => handleMagnitudeChange(2, parseFloat(e.target.value))}
-                    step="0.1"
-                    min="1.0"
-                    max="10.0"
+                    onChange={(e) => {
+                        const inputValue = e.target.value.replace(',', '.');
+                        if (/^\d*\.?\d*$/.test(inputValue)) {
+                            handleMagnitudeChangeLocal(2, parseFloat(inputValue));
+                        }
+                    }}
                     aria-describedby="magnitudesError"
                 />
             </div>
@@ -244,8 +248,6 @@ export default function App() {
 
     const handleCalculate = () => {
         setIsLoading(true);
-
-        // Küçük bir gecikme ile hesaplama sonuçlarının gösterilmesi
         setTimeout(() => {
             if (mode === "single") {
                 setResults(calculateEnergy(m1));
@@ -273,12 +275,10 @@ export default function App() {
         return null;
     }, [results]);
 
-    // Ana içerik bileşenini belirliyoruz
     const renderContent = () => {
         if (!mode) {
             return <ModeSelector onSelectMode={setMode} />;
         }
-
         return (
             <>
                 {mode === "single" ? (
@@ -308,9 +308,5 @@ export default function App() {
         );
     };
 
-    return (
-        <div className="App">
-            {renderContent()}
-        </div>
-    );
+    return <div className="App">{renderContent()}</div>;
 }

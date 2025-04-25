@@ -243,39 +243,3 @@ ul.results li:hover {
     opacity: 0;
     transition: opacity 300ms;
 }
-
-/* Karanlık mod desteği */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --primary: #2196f3;
-        --primary-dark: #1976d2;
-        --secondary: #555;
-        --background: #121212;
-        --card-bg: #1e1e1e;
-        --text: #f0f0f0;
-        --border: #444;
-        --error: #ff6b6b;
-        --card-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
-
-    input[type="number"] {
-        background-color: #2d2d2d;
-        color: var(--text);
-        border-color: var(--border);
-    }
-
-    .comparison {
-        background-color: #2d2d2d;
-        color: #e0e0e0;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    ul.results li {
-        background-color: #2d2d2d;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    .icon {
-        background-color: rgba(255,255,255,0.05);
-    }
-}
