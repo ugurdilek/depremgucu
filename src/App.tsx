@@ -4,6 +4,7 @@ import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
 import { WiDayLightning } from "react-icons/wi";
 import { RiScales3Line } from "react-icons/ri";
+import { Helmet } from 'react-helmet';
 
 export interface EnergyResult {
     label: string;
@@ -183,5 +184,19 @@ export default function App() {
         );
     };
 
-    return <div className="App">{renderContent()}</div>;
+    return (
+        <div className="App">
+            <Helmet>
+                <title>Deprem Gücü Hesaplayıcı</title>
+                <meta name="description" content="Depremlerin enerji karşılığını hesaplayın, büyüklükleri karşılaştırın." />
+                <meta property="og:title" content="Deprem Gücü Hesaplayıcı" />
+                <meta property="og:description" content="Depremlerin enerji karşılığını hesaplayın, büyüklükleri karşılaştırın." />
+                <meta property="og:image" content="https://depremgucu.vercel.app/preview.png" />
+                <meta property="og:url" content="https://depremgucu.vercel.app" />
+                <meta name="twitter:card" content="summary_large_image" />
+            </Helmet>
+
+            {renderContent()}
+        </div>
+    );
 }
