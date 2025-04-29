@@ -73,8 +73,7 @@ export default function App() {
     };
 
     const handleMagnitudeChange = (index: number, value: string) => {
-        const input = value;
-        if (input === "") {
+        if (value === "") {
             if (index === 1) {
                 setM1("");
             } else {
@@ -82,13 +81,13 @@ export default function App() {
             }
             setError(null);
         } else {
-            const parsed = parseFloat(input);
+            const parsed = parseFloat(value);
             if (!isNaN(parsed)) {
                 if (parsed >= 1.0 && parsed <= 10.0) {
                     if (index === 1) {
-                        setM1("");
+                        setM1(parsed);
                     } else {
-                        setM2("");
+                        setM2(parsed);
                     }
                     setError(null);
                 } else {
@@ -105,7 +104,7 @@ export default function App() {
         setM1("");
         setM2("");
         setError(null);
-        window.scrollTo(0, 0); // mobilde üstte konumlan
+        window.scrollTo(0, 0); // mobilde ekranı en üste getir
     };
 
     const renderContent = () => {
@@ -133,7 +132,7 @@ export default function App() {
                             id="magnitude"
                             type="number"
                             step="any"
-                            value={m1}
+                            value={m1 === "" ? "" : String(m1)}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.5"
                         />
@@ -149,7 +148,7 @@ export default function App() {
                             id="magnitude1"
                             type="number"
                             step="any"
-                            value={m1}
+                            value={m1 === "" ? "" : String(m1)}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.0"
                         />
@@ -158,7 +157,7 @@ export default function App() {
                             id="magnitude2"
                             type="number"
                             step="any"
-                            value={m2}
+                            value={m2 === "" ? "" : String(m2)}
                             onChange={(e) => handleMagnitudeChange(2, e.target.value)}
                             placeholder="Örn: 7.0"
                         />
