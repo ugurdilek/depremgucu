@@ -101,8 +101,6 @@ export default function App() {
         }
     };
 
-
-    // Uygulamayı sıfırla
     const reset = () => {
         setMode(null);
         setResults(null);
