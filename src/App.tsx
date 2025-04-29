@@ -4,7 +4,7 @@ import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
 import { WiDayLightning } from "react-icons/wi";
 import { RiScales3Line } from "react-icons/ri";
-import { Helmet } from 'react-helmet';
+import { Helmet } from "react-helmet";
 
 export interface EnergyResult {
     label: string;
@@ -12,7 +12,6 @@ export interface EnergyResult {
     icon: JSX.Element;
 }
 
-// Lazy-load bileşen
 const ResultsList = lazy(() => import("./components/ResultsList"));
 
 function useEarthquakeCalculator() {
@@ -45,8 +44,8 @@ function useEarthquakeCalculator() {
 
 export default function App() {
     const [mode, setMode] = useState<"single" | "compare" | null>(null);
-    const [m1, setM1] = useState<number | ''>('');
-    const [m2, setM2] = useState<number | ''>('');
+    const [m1, setM1] = useState<number | "">("");
+    const [m2, setM2] = useState<number | "">("");
     const [results, setResults] = useState<EnergyResult[] | null>(null);
     const [comparison, setComparison] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +54,7 @@ export default function App() {
     const { calculateEnergy, compareMagnitudes } = useEarthquakeCalculator();
 
     const handleCalculate = () => {
-        if (typeof m1 !== 'number' || (mode === "compare" && typeof m2 !== 'number')) {
+        if (typeof m1 !== "number" || (mode === "compare" && typeof m2 !== "number")) {
             setError("Geçerli büyüklük değerleri giriniz.");
             return;
         }
@@ -65,10 +64,8 @@ export default function App() {
             if (mode === "single") {
                 setResults(calculateEnergy(m1));
                 setComparison("");
-            } else if (mode === "compare") {
-                if (typeof m2 === 'number') {
-                    setComparison(compareMagnitudes(m1, m2));
-                }
+            } else if (mode === "compare" && typeof m2 === "number") {
+                setComparison(compareMagnitudes(m1, m2));
                 setResults(null);
             }
             setIsLoading(false);
@@ -77,17 +74,22 @@ export default function App() {
 
     const handleMagnitudeChange = (index: number, value: string) => {
         const input = value;
-
-        if (input === '') {
-            if (index === 1) setM1('');
-            else setM2('');
+        if (input === "") {
+            if (index === 1) {
+                setM1("");
+            } else {
+                setM2("");
+            }
             setError(null);
         } else {
             const parsed = parseFloat(input);
             if (!isNaN(parsed)) {
                 if (parsed >= 1.0 && parsed <= 10.0) {
-                    if (index === 1) setM1(parsed);
-                    else setM2(parsed);
+                    if (index === 1) {
+                        setM1("");
+                    } else {
+                        setM2("");
+                    }
                     setError(null);
                 } else {
                     setError("Lütfen 1.0 ile 10.0 arasında bir değer giriniz.");
@@ -100,9 +102,10 @@ export default function App() {
         setMode(null);
         setResults(null);
         setComparison("");
-        setM1('');
-        setM2('');
+        setM1("");
+        setM2("");
         setError(null);
+        window.scrollTo(0, 0); // mobilde üstte konumlan
     };
 
     const renderContent = () => {
@@ -167,7 +170,7 @@ export default function App() {
 
                 {isLoading && <div className="loading">Hesaplanıyor...</div>}
 
-                {comparison && (
+                {mode === "compare" && comparison && (
                     <div className="content-container">
                         <p className="comparison">{comparison}</p>
                     </div>
