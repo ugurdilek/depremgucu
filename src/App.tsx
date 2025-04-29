@@ -1,4 +1,4 @@
-import {JSX, useState} from "react";
+import { JSX, useState } from "react";
 import "./App.css";
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
@@ -50,7 +50,6 @@ export default function App() {
 
     const { calculateEnergy, compareMagnitudes } = useEarthquakeCalculator();
 
-    // Deprem büyüklüğüne göre hesaplama yap
     const handleCalculate = () => {
         if (typeof m1 !== 'number' || (mode === "compare" && typeof m2 !== 'number')) {
             setError("Geçerli büyüklük değerleri giriniz.");
@@ -72,11 +71,8 @@ export default function App() {
         }, 300);
     };
 
-
-    // Input değer değişimi
     const handleMagnitudeChange = (index: number, value: string) => {
-        const input = value; // virgül zaten dışarıda nokta yapılmış
-
+        const input = value;
         if (input === '') {
             if (index === 1) {
                 setM1('');
@@ -113,22 +109,22 @@ export default function App() {
     const renderContent = () => {
         if (!mode) {
             return (
-                <div className="content-container">
+                <main className="content-container">
                     <h1>Deprem Gücü Hesaplayıcı</h1>
                     <p>Ne yapmak istiyorsunuz?</p>
-                    <button onClick={() => setMode("single")}>🔹 Enerji Hesapla</button>
-                    <button onClick={() => setMode("compare")}>
+                    <button onClick={() => setMode("single")} aria-label="Enerji hesaplama modunu seç">🔹 Enerji Hesapla</button>
+                    <button onClick={() => setMode("compare")} aria-label="Deprem karşılaştırma modunu seç">
                         <RiScales3Line style={{ marginRight: "6px" }} />
                         Depremleri Karşılaştır
                     </button>
-                </div>
+                </main>
             );
         }
 
         return (
             <>
                 {mode === "single" ? (
-                    <div className="content-container">
+                    <section className="content-container">
                         <h1>Enerji Hesaplama</h1>
                         <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                         <input
@@ -138,13 +134,16 @@ export default function App() {
                             value={m1}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.5"
+                            aria-label="Depremin büyüklüğü"
+                            aria-describedby="magnitude-desc"
                         />
-                        {error && <p className="error">{error}</p>}
-                        <button onClick={handleCalculate}>Hesapla</button>
-                        <button onClick={reset} className="secondary-button">↩ Geri</button>
-                    </div>
+                        <small id="magnitude-desc">1.0 ile 10.0 arasında bir değer giriniz.</small>
+                        {error && <p className="error" role="alert">{error}</p>}
+                        <button onClick={handleCalculate} aria-label="Depremin enerjisini hesapla">Hesapla</button>
+                        <button onClick={reset} className="secondary-button" aria-label="Geri dön">↩ Geri</button>
+                    </section>
                 ) : (
-                    <div className="content-container">
+                    <section className="content-container">
                         <h1>Deprem Karşılaştırma</h1>
                         <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                         <input
@@ -154,6 +153,7 @@ export default function App() {
                             value={m1}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.0"
+                            aria-label="Birinci depremin büyüklüğü"
                         />
                         <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
                         <input
@@ -163,34 +163,38 @@ export default function App() {
                             value={m2}
                             onChange={(e) => handleMagnitudeChange(2, e.target.value)}
                             placeholder="Örn: 7.0"
+                            aria-label="İkinci depremin büyüklüğü"
                         />
-                        {error && <p className="error">{error}</p>}
-                        <button onClick={handleCalculate}>Hesapla</button>
-                        <button onClick={reset} className="secondary-button">↩ Geri</button>
-                    </div>
+                        {error && <p className="error" role="alert">{error}</p>}
+                        <button onClick={handleCalculate} aria-label="Depremleri karşılaştır">Hesapla</button>
+                        <button onClick={reset} className="secondary-button" aria-label="Geri dön">↩ Geri</button>
+                    </section>
                 )}
 
-                {isLoading && <div className="loading">Hesaplanıyor...</div>}
+                {isLoading && <div className="loading" role="status">Hesaplanıyor...</div>}
 
                 {comparison && (
-                    <div className="content-container">
+                    <section className="content-container">
                         <p className="comparison">{comparison}</p>
-                    </div>
+                    </section>
                 )}
 
                 {results && (
-                    <div className="content-container">
+                    <section className="content-container">
                         <ul className="results">
                             {results.map((item, index) => (
                                 <li key={index}>
-                  <span className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}>
-                    {item.icon}
-                  </span>
+                                    <span
+                                        className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}
+                                        aria-hidden="true"
+                                    >
+                                        {item.icon}
+                                    </span>
                                     <span>{item.label}: {item.value}</span>
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </section>
                 )}
             </>
         );
