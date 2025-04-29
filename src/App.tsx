@@ -34,9 +34,9 @@ function useEarthquakeCalculator() {
         const factor = Math.pow(10, diff);
         if (factor === 1) return "Her iki deprem eşit büyüklüktedir.";
         if (factor > 1)
-            return `${m2.toFixed(1)} büyüklüğündeki deprem, ${m1.toFixed(1)} büyüklüğündekinden yaklaşık ${factor.toFixed(1)} kat daha güçlüdür.`;
+            return `${m2.toFixed(1)} büyüklüğündeki deprem, ${m1.toFixed(1)} büyüklüğündekinden yaklandekinden yaklaşık ${factor.toFixed(1)} kat daha güçlüdür.`;
         else
-            return `${m1.toFixed(1)} büyüklüğündeki deprem, ${m2.toFixed(1)} büyüklüğündekinden yaklaşık ${(1 / factor).toFixed(1)} kat daha güçlüdür.`;
+            return `${m1.toFixed(1)} büyüklüğündeki deprem, ${m2.toFixed(1)} büyüklüğündekinden yaklandekinden yaklaşık ${(1 / factor).toFixed(1)} kat daha güçlüüdür.`;
     };
 
     return { calculateEnergy, compareMagnitudes };
@@ -47,7 +47,7 @@ export default function App() {
     const [m1, setM1] = useState<number | "">("");
     const [m2, setM2] = useState<number | "">("");
     const [results, setResults] = useState<EnergyResult[] | null>(null);
-    const [comparison, setComparison] = useState("");
+    const [comparison, setComparison] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -63,7 +63,7 @@ export default function App() {
         setTimeout(() => {
             if (mode === "single") {
                 setResults(calculateEnergy(m1));
-                setComparison("");
+                setComparison(null);
             } else if (mode === "compare" && typeof m2 === "number") {
                 setComparison(compareMagnitudes(m1, m2));
                 setResults(null);
@@ -98,25 +98,14 @@ export default function App() {
     };
 
     const reset = () => {
-        setMode(null);
-        setResults(null);
-        setComparison("");
-        setM1("");
-        setM2("");
-        setError(null);
-
-        // Garantili render için çok küçük zamanlı yeniden tetikleyici
-        setTimeout(() => {
-            window.scrollTo(0, 0);
-        }, 50);
+        window.location.reload();
     };
-
 
     const renderContent = () => {
         if (!mode) {
             return (
                 <div className="content-container">
-                    <h1>Deprem Gücü Hesaplayıcı</h1>
+                    <h1>Deprem Gücü Hesaplıyıcı</h1>
                     <p>Ne yapmak istiyorsunuz?</p>
                     <button onClick={() => setMode("single")}>🔹 Enerji Hesapla</button>
                     <button onClick={() => setMode("compare")}>
@@ -174,7 +163,7 @@ export default function App() {
 
                 {isLoading && <div className="loading">Hesaplanıyor...</div>}
 
-                {mode === "compare" && comparison.trim() !== "" && (
+                {comparison && (
                     <div className="content-container">
                         <p className="comparison">{comparison}</p>
                     </div>
@@ -192,15 +181,10 @@ export default function App() {
     };
 
     return (
-        <div className="App" key={mode ?? "default"}>
+        <div className="App">
             <Helmet>
-                <title>Deprem Gücü Hesaplayıcı</title>
+                <title>Deprem Gücü Hesaplıyıcı</title>
                 <meta name="description" content="Depremlerin enerji karşılığını hesaplayın, büyüklükleri karşılaştırın." />
-                <meta property="og:title" content="Deprem Gücü Hesaplayıcı" />
-                <meta property="og:description" content="Depremlerin enerji karşılığını hesaplayın, büyüklükleri karşılaştırın." />
-                <meta property="og:image" content="https://depremgucu.vercel.app/preview.png" />
-                <meta property="og:url" content="https://depremgucu.vercel.app" />
-                <meta name="twitter:card" content="summary_large_image" />
             </Helmet>
 
             {renderContent()}
