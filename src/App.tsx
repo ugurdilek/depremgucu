@@ -1,15 +1,18 @@
-import { JSX, useState } from "react";
+import { JSX, useState, lazy, Suspense } from "react";
 import "./App.css";
 import { FaBolt, FaBomb } from "react-icons/fa";
 import { GiNuclearBomb } from "react-icons/gi";
 import { WiDayLightning } from "react-icons/wi";
 import { RiScales3Line } from "react-icons/ri";
 
-interface EnergyResult {
+export interface EnergyResult {
     label: string;
     value: string;
     icon: JSX.Element;
 }
+
+// Lazy-load bileşen
+const ResultsList = lazy(() => import("./components/ResultsList"));
 
 function useEarthquakeCalculator() {
     const calculateEnergy = (magnitude: number): EnergyResult[] => {
@@ -73,22 +76,17 @@ export default function App() {
 
     const handleMagnitudeChange = (index: number, value: string) => {
         const input = value;
+
         if (input === '') {
-            if (index === 1) {
-                setM1('');
-            } else {
-                setM2('');
-            }
+            if (index === 1) setM1('');
+            else setM2('');
             setError(null);
         } else {
             const parsed = parseFloat(input);
             if (!isNaN(parsed)) {
                 if (parsed >= 1.0 && parsed <= 10.0) {
-                    if (index === 1) {
-                        setM1(parsed);
-                    } else {
-                        setM2(parsed);
-                    }
+                    if (index === 1) setM1(parsed);
+                    else setM2(parsed);
                     setError(null);
                 } else {
                     setError("Lütfen 1.0 ile 10.0 arasında bir değer giriniz.");
@@ -109,22 +107,22 @@ export default function App() {
     const renderContent = () => {
         if (!mode) {
             return (
-                <main className="content-container">
+                <div className="content-container">
                     <h1>Deprem Gücü Hesaplayıcı</h1>
                     <p>Ne yapmak istiyorsunuz?</p>
-                    <button onClick={() => setMode("single")} aria-label="Enerji hesaplama modunu seç">🔹 Enerji Hesapla</button>
-                    <button onClick={() => setMode("compare")} aria-label="Deprem karşılaştırma modunu seç">
+                    <button onClick={() => setMode("single")}>🔹 Enerji Hesapla</button>
+                    <button onClick={() => setMode("compare")}>
                         <RiScales3Line style={{ marginRight: "6px" }} />
                         Depremleri Karşılaştır
                     </button>
-                </main>
+                </div>
             );
         }
 
         return (
             <>
                 {mode === "single" ? (
-                    <section className="content-container">
+                    <div className="content-container">
                         <h1>Enerji Hesaplama</h1>
                         <label htmlFor="magnitude">Depremin Büyüklüğü (Mw):</label>
                         <input
@@ -134,16 +132,13 @@ export default function App() {
                             value={m1}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.5"
-                            aria-label="Depremin büyüklüğü"
-                            aria-describedby="magnitude-desc"
                         />
-                        <small id="magnitude-desc">1.0 ile 10.0 arasında bir değer giriniz.</small>
-                        {error && <p className="error" role="alert">{error}</p>}
-                        <button onClick={handleCalculate} aria-label="Depremin enerjisini hesapla">Hesapla</button>
-                        <button onClick={reset} className="secondary-button" aria-label="Geri dön">↩ Geri</button>
-                    </section>
+                        {error && <p className="error">{error}</p>}
+                        <button onClick={handleCalculate}>Hesapla</button>
+                        <button onClick={reset} className="secondary-button">↩ Geri</button>
+                    </div>
                 ) : (
-                    <section className="content-container">
+                    <div className="content-container">
                         <h1>Deprem Karşılaştırma</h1>
                         <label htmlFor="magnitude1">1. Depremin Büyüklüğü (Mw):</label>
                         <input
@@ -153,7 +148,6 @@ export default function App() {
                             value={m1}
                             onChange={(e) => handleMagnitudeChange(1, e.target.value)}
                             placeholder="Örn: 6.0"
-                            aria-label="Birinci depremin büyüklüğü"
                         />
                         <label htmlFor="magnitude2">2. Depremin Büyüklüğü (Mw):</label>
                         <input
@@ -163,38 +157,27 @@ export default function App() {
                             value={m2}
                             onChange={(e) => handleMagnitudeChange(2, e.target.value)}
                             placeholder="Örn: 7.0"
-                            aria-label="İkinci depremin büyüklüğü"
                         />
-                        {error && <p className="error" role="alert">{error}</p>}
-                        <button onClick={handleCalculate} aria-label="Depremleri karşılaştır">Hesapla</button>
-                        <button onClick={reset} className="secondary-button" aria-label="Geri dön">↩ Geri</button>
-                    </section>
+                        {error && <p className="error">{error}</p>}
+                        <button onClick={handleCalculate}>Hesapla</button>
+                        <button onClick={reset} className="secondary-button">↩ Geri</button>
+                    </div>
                 )}
 
-                {isLoading && <div className="loading" role="status">Hesaplanıyor...</div>}
+                {isLoading && <div className="loading">Hesaplanıyor...</div>}
 
                 {comparison && (
-                    <section className="content-container">
+                    <div className="content-container">
                         <p className="comparison">{comparison}</p>
-                    </section>
+                    </div>
                 )}
 
                 {results && (
-                    <section className="content-container">
-                        <ul className="results">
-                            {results.map((item, index) => (
-                                <li key={index}>
-                                    <span
-                                        className={`icon ${item.label.toLowerCase().replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ /g, '-')}`}
-                                        aria-hidden="true"
-                                    >
-                                        {item.icon}
-                                    </span>
-                                    <span>{item.label}: {item.value}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
+                    <div className="content-container">
+                        <Suspense fallback={<div>Sonuçlar yükleniyor...</div>}>
+                            <ResultsList results={results} />
+                        </Suspense>
+                    </div>
                 )}
             </>
         );
