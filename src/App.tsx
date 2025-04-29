@@ -104,8 +104,13 @@ export default function App() {
         setM1("");
         setM2("");
         setError(null);
-        window.scrollTo(0, 0); // mobilde ekranı en üste getir
+
+        // Garantili render için çok küçük zamanlı yeniden tetikleyici
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 50);
     };
+
 
     const renderContent = () => {
         if (!mode) {
@@ -169,7 +174,7 @@ export default function App() {
 
                 {isLoading && <div className="loading">Hesaplanıyor...</div>}
 
-                {mode === "compare" && comparison && (
+                {mode === "compare" && comparison.trim() !== "" && (
                     <div className="content-container">
                         <p className="comparison">{comparison}</p>
                     </div>
@@ -187,7 +192,7 @@ export default function App() {
     };
 
     return (
-        <div className="App">
+        <div className="App" key={mode ?? "default"}>
             <Helmet>
                 <title>Deprem Gücü Hesaplayıcı</title>
                 <meta name="description" content="Depremlerin enerji karşılığını hesaplayın, büyüklükleri karşılaştırın." />
